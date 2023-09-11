@@ -1,0 +1,74 @@
+# GammaShield.py
+# Random walk of 1MeV gamma photons through a slab of lead.
+import numpy as np
+from numpy.random import rand
+
+# Linear attenuation coefficients [cm^-1]. muT = Total, muC = Compton
+def AttnCoeffs(E):
+    muT = 0.34 * (1 + 1 / E + 0.25 / E ** 2.8)
+    muC = 0.57 * (1 - 0.49 * np.log(E))
+    return muT, muC
+
+# muL = "Thickness" of lead slab [mean free paths]
+muL = 2.0
+
+# Energy of incident gamma photons [MeV]
+E0 = 1.0
+
+# Initialise attn coeffs and actual thickness L [cm])
+muT0, muC0 = AttnCoeffs(E0)
+L = muL / muT0
+
+# Number of gamma photons
+N = 10**6
+
+# Create storage space for exit energies
+energy = np.zeros(N)
+
+# Loop through N photons
+for p in range(N):
+    # Initial Energy and attn coeffs
+    E, muT, muC = E0, muT0, muC0
+    
+    # Initial direction coordinates (uvec) and step size (x)
+    uvec = np.array([1, 0, 0])
+    x = -np.log(rand()) / muT0
+    
+    # Follow the photon’s random walk
+    keepgoing = True  # Flag to indicate if photon is still inside slab
+    
+    while keepgoing:
+        uvec_old = uvec
+        
+        if x > L:  # Photon has passed through slab
+            energy[p] = E
+            keepgoing = False
+        elif x < 0:  # Photon has returned to start
+            keepgoing = False
+        elif rand() < 1 - muC / muT:  # Photon has been absorbed
+            keepgoing = False
+        else:  # Photon has been scattered
+            # random angles
+            psi = 2 * np.pi * rand()
+            cphi = 1 - 2 * rand()
+            phi = np.arccos(cphi)
+            sphi = np.sin(phi)
+            
+            # Update unit direction vector
+            uvec_rnd = np.array([sphi * np.cos(psi), sphi * np.sin(psi), cphi])
+            uvec = uvec_old + uvec_rnd
+            uvec = uvec / np.linalg.norm(uvec)
+            
+            # cos(theta)
+            ctheta = uvec_old @ uvec
+            
+            # Update scattered photon energy, attn coeffs and distances
+            E = 0.511 / (1 - ctheta + 0.511 / E)
+            muT, muC = AttnCoeffs(E)
+            r = -np.log(rand()) / muT
+            x = x + r * uvec[0]
+    
+# end of for p in range(N) loop
+
+# Build-up factor
+BF = np.sum(energy) / (E0 * N * np.exp(-muL))
