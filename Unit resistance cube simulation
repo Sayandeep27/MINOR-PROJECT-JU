@@ -1,0 +1,42 @@
+# UnitCube.py
+# Uses the Random walk method to calculate voltages at nodes of a cube of
+# unit resistors subject to a voltage drop of 1 volt across diagonally
+# opposite corners.
+import numpy as np
+from numpy.random import randint
+
+# Connected node list for internal nodes (i.e., nodes 1 to 6)
+# Node 1 is connected to nodes 2, 6, 7
+# Node 2 is connected to nodes 1, 3, 8, etc.
+connect = np.array([[2, 6, 7], [1, 3, 8], [2, 4, 7], [3, 5, 8], [4, 6, 7], [1, 5, 8]])
+
+# Boundary voltages [node 7, node 8]
+Vbnd = np.array([0, 1])
+
+# Number of random walks
+N = 1000
+
+# Storage space for voltages
+V = np.zeros([2, N])
+
+# Random walks (only start from nodes 1 and 2 because of symmetry)
+for i in range(2):
+    for t in range(N):
+        node = i + 1
+        keepgoing = True
+        
+        while keepgoing:
+            p = randint(1, 4) - 1
+            node = connect[node - 1, p]
+            
+            if node > 6:
+                V[i, t] = Vbnd[node - 7]
+                keepgoing = False
+# end of if node > 6
+# end of while keepgoing
+# end of for t in range(N)
+# end of for i in range(2)
+
+# Estimate nodal voltages
+V1 = np.mean(V[0, :])
+V2 = np.mean(V[1, :])
