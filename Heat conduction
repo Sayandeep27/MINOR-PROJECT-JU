@@ -1,0 +1,82 @@
+# PlateTemperatures
+# Calculation of center-line temperatures through a plate containing
+# a defect using the random walk of virtual particles.
+import numpy as np
+from numpy.random import randint
+
+# thickness, defect half-width, plate width
+t, R, L = 18, 5, 40
+
+# hot, cold surface temperatures
+Thot, Tcold = 100, 20
+
+# defect row
+defectrow = int(t / 2)
+
+# storage for linearly falling temperatures
+Tlinear = np.zeros(t + 1)
+
+# linear position temperatures
+for i in range(t + 1):
+    Tlinear[i] = Thot - (Thot - Tcold) * i / t
+
+# Storage for C/L temperatures
+CLTemp = np.zeros(t + 1)
+
+# Fix surface temperatures
+CLTemp[0], CLTemp[t] = Thot, Tcold
+
+# Number of virtual particles
+N = 10**4
+
+# Calculate center-line temperatures
+for row in range(1, t):
+    T = 0
+    for trial in range(N):
+        r, c = row, 0
+        if r == defectrow and c == 0:
+            keepgoing = False
+        else:
+            keepgoing = True
+        
+        while keepgoing:
+            rc, cc = r, c
+            p = randint(4)
+            
+            # make move
+            if p == 0:
+                r = rc - 1  # move N
+                if r == defectrow and cc < R:
+                    r = rc
+            elif p == 1:
+                c = cc - 1  # move W
+                if r == defectrow and c == R:
+                    c = cc
+            elif p == 2:
+                r = rc + 1  # move S
+                if r == defectrow and cc < R:
+                    r = rc
+            else:
+                c = cc + 1  # move E
+            
+            # check boundaries
+            if r < 1:
+                T = Thot + T
+                keepgoing = False
+            elif r > t:
+                T = Tcold + T
+                keepgoing = False
+            elif c > L - 1:
+                T = Tlinear[r] + T
+                keepgoing = False
+            if c < 0:
+                c = c + 1
+        
+        # end of while keepgoing. This particle’s walk is finished
+    # end of for trial in range(N). Completed all particles for this row
+    CLTemp[row] = T / N  # average temperature for this row
+
+# end of for row in range(1, t). All rows completed
+
+# set defect row temperature
+CLTemp[defectrow] = (CLTemp[defectrow - 1] + CLTemp[defectrow + 1]) / 2
