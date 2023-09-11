@@ -1,0 +1,32 @@
+# Torussegment.py
+# Estimates volume of torus segment from hit-or-miss method
+# by scattering random points in wedge bounding a positive
+# end-piece of the torus segment.
+import numpy as np
+from numpy.random import rand
+# Radii of torus centreline and torus "tube"
+Rc, Rt = 3, 1
+# Inner and outer radii and their squares
+Rmin, Rmax = Rc - Rt, Rc + Rt
+Rminsq, Rmaxsq = Rmin**2, Rmax**2
+# Bounding angles and heights
+thetamin, thetamax = np.arccos(1/2), np.arccos(1/4)
+zmin, zmax = 0, Rt
+# Volume of wedge
+Vwedge = 0.5*(thetamax - thetamin)*(Rmax**2 - Rmin**2)*(zmax
+- zmin)
+# Volume of torus segment between +/- thetamin
+Vseg = (thetamin/np.pi)*2*np.pi*Rc*np.pi*Rt**2
+# Number of points
+N = 1000
+# Generate N random values of radius, angle and height
+r = np.sqrt(Rminsq + rand(N)*(Rmaxsq - Rminsq))
+theta = thetamin + rand(N)*(thetamax - thetamin)
+z = zmin + rand(N)*(zmax - zmin)
+# Calculate if the points hit the torus piece or not
+hits = ( np.sqrt( (r-Rc)**2 + z**2 )<=Rt ) * ( r*np.
+cos(theta)>=1 )
+# Fraction of points within the torus piece
+f = np.mean(hits)
+# Estimate of torus segment volume
+V = 4*f*Vwedge + Vseg
