@@ -1,0 +1,33 @@
+# Buffon.py
+# Estimates pi using Buffon’s needle method
+import numpy as np
+from numpy.random import rand
+
+# D = spacing, L = needle length, N = number of needles
+D, L, N = 10, 8, 1000
+
+# y = needle centres
+y = rand(N) * D
+
+# vertical distances between needle centres and needle ends
+r = np.zeros(N)
+yy = np.zeros(N)
+
+for i in range(N):
+    R = 2
+    while R > 1:
+        X = rand()
+        Y = rand()
+        R = np.sqrt(X**2 + Y**2)
+    r[i] = R
+    yy[i] = Y
+    deltay = (L/2) * yy / r
+
+# hits = True if needle touches line or False if not
+hits = (deltay >= y) + (deltay >= D - y)
+
+# f = Fraction that cross a line
+f = np.mean(hits)
+
+# Monte-Carlo estimate of pi
+PI = 2 * L / (f * D)
