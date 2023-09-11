@@ -1,0 +1,37 @@
+# Viewfactor.py
+# Estimates thermal radiation view factor between horizontal
+# and vertical touching surfaces.
+import numpy as np
+from numpy.random import rand
+
+# Dimensions of surfaces (lengths)
+X, Y, Z = 1, 1, 2
+
+# Number of trials, points
+trials, N = 400, 1000
+
+# Create storage space for view factors then loop through trials
+vf = np.zeros(trials)
+
+for trial in range(0, trials):
+    # random values on horizontal surface
+    x = rand(N) * X
+    yh = rand(N) * Y
+    theta = np.arccos(1 - 2 * rand(N)) / 2
+    phi = rand(N) * np.pi - np.pi / 2
+    
+    # points on vertical plane
+    dy = x * np.tan(phi)
+    yv = yh + dy
+    z = np.sqrt(x**2 + dy**2) * np.tan(np.pi/2 - theta)
+    
+    # number of points that hit vertical surface
+    hits = sum((z > 0) * (z < Z) * (yv > 0) * (yv < Y))
+    
+    # view factors
+    vf[trial] = hits / (2 * N)
+
+# Summary statistics
+mu = np.mean(vf)
+sigma = np.std(vf)
+se = sigma / np.sqrt(trials)
