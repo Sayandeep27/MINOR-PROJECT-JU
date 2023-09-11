@@ -1,0 +1,34 @@
+# BuckledCylinder.py
+# Calculates the probability that a hollow cylinder will buckle
+# when subjected to a compressive axial load.
+import numpy as np
+from numpy.random import rand, randn
+
+# Basic data
+v = 0.33  # Poisson’s ratio
+tnom = 0.002  # Nominal thickness [m]
+Enom = 70E9  # Nominal Young’s modulus[Pa]
+Pnom = 300000  # Nominal compressive load [N]
+st = 1E-4  # Standard deviation of t [m]
+rE = 10E9  # Half range of E [Pa]
+sP = 10000  # Standard deviation of P [N]
+
+# Derived data (Pcrit = Pcon.E.t^2)
+Pcon = 0.4 * 2 * np.pi / np.sqrt(3 * (1 - v ** 2))
+
+# Number of cylinders
+N = 10 ** 6
+
+# Random values of E (uniform), t (normal) and P (normal)
+E = Enom + (2 * rand(N) - 1) * rE
+t = tnom + randn(N) * st
+P = Pnom + randn(N) * sP
+
+# P/Pcrit
+Pratio = P / (Pcon * E * t ** 2)
+
+# failures = True if criterion exceeded, False if not
+failures = Pratio >= 1
+
+# Overall failure probability
+failprob = np.mean(failures)
