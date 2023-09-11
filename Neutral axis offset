@@ -1,0 +1,18 @@
+# CurvedBeam.py
+# Estimates distance, h, between centroidal and neutral axes
+# of a curved beam of circular cross-section
+import numpy as np
+from numpy.random import rand
+# R, Rc = Radius of circle and centroidal axis respectively
+R, Rc = 1, 1.5
+# Number of points
+N = 1000
+# r = radii, theta = angles, s = displacements from axis
+r = np.sqrt(rand(N)*R**2)
+theta = rand(N)*2*np.pi
+s = r*np.sin(theta)
+# integrand denominator and numerator
+den = 1/(Rc - s)
+num = s*den
+# Ratio of integrals gives h, the neutral axis offset
+h = np.trapz(num)/np.trapz(den)
