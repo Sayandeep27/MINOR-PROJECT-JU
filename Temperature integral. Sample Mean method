@@ -1,0 +1,21 @@
+# SampleMean.py
+# Temperature integral of erf(eta/2). Sample mean method.
+import numpy as np
+from numpy.random import rand
+
+# eta = x/sqrt(alpha*t), ymax = rectangle height
+eta = 2.5
+ymax = 2/np.sqrt(np.pi)
+
+# Number of points
+N = 500
+
+# N random values of z and y
+z = rand(N) * eta/2
+y = ymax * np.exp(-z**2)
+
+# Average value of y
+yave = np.mean(y)
+
+# area = average * range
+area = yave * eta / 2
