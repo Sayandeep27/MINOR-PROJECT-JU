@@ -1,0 +1,25 @@
+# HitOrMiss.py
+# Temperature integral of erf(eta/2). Hit or miss method.
+import numpy as np
+from numpy.random import rand
+
+# Monte-Carlo Simulation
+# eta = x/sqrt(alpha*t), ymax = rectangle height
+eta = 2.5
+ymax = 2/np.sqrt(np.pi)
+
+# Number of points
+N = 1000
+
+# N random values of z and y
+z = rand(N) * eta/2
+y = rand(N) * ymax
+
+# hits = True if points lie on or below curve
+hits = y <= ymax * np.exp(-z**2)
+
+# f = Fraction of points lying on or below curve.
+f = np.sum(hits) / N
+
+# Corresponding estimate of the area.
+area = f * eta / np.sqrt(np.pi)
