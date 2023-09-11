@@ -1,0 +1,37 @@
+# SingleNode.py
+# Monte-Carlo calculation of a single node voltage.
+import numpy as np
+from numpy.random import rand
+
+# Specify resistances, R [ohms], and known boundary node voltages, Vb [volts]
+R = np.array([200, 100, 50])
+Vb = np.array([20, 10, 0])
+
+# Inverse resistances.
+InvR = 1 / R
+S = np.sum(InvR)
+
+# Weights
+p = InvR / S
+pcum = np.cumsum(p)
+
+# Number of random walks.
+N = 1000
+
+# Space for voltage estimates.
+V = np.zeros(N)
+
+# N uniform random numbers between 0 and 1
+k = rand(N)
+
+# Random walks
+for t in range(N):
+    if k[t] < pcum[0]:
+        V[t] = Vb[0]
+    elif k[t] < pcum[1]:
+        V[t] = Vb[1]
+    else:
+        V[t] = Vb[2]
+
+# Voltage estimate for node 4
+V4 = np.sum(V) / N
